@@ -1,21 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account } from '../appwrite/appwriteConfig';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await account.deleteSession('current'); // Attempt to delete old session
+      await account.deleteSession('current');
     } catch {}
+
     try {
       await account.createEmailPasswordSession(email, password);
-      navigate('/dashboard');
+      const userData = await account.get();     // ✅ fetch user
+      setUser(userData);                        // ✅ update context
+      navigate('/dashboard');                   // ✅ go to dashboard
     } catch (err) {
       setError(err.message);
     }
@@ -54,6 +60,14 @@ function Login() {
           </button>
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
         </form>
+
+        {/* Add the Sign Up link here */}
+        <p className="text-center text-gray-300 mt-4">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-400 font-semibold hover:underline">
+            Sign Up Now
+          </Link>
+        </p>
       </div>
     </div>
   );

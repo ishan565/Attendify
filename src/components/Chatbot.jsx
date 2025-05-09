@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SendHorizonal, X } from 'lucide-react';
 
-function Chatbot({ onClose }) {
+function Chatbot() {
+  const [visible, setVisible] = useState(true);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef(null);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
-
+    if (!input.trim() || sending) return;
     const userMessage = { sender: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setSending(true);
 
     try {
       const res = await fetch("http://localhost:5050/chat", {
@@ -21,6 +24,8 @@ function Chatbot({ onClose }) {
         body: JSON.stringify({ message: input }),
       });
 
+      if (!res.ok) throw new Error("Network response was not ok");
+
       const data = await res.json();
       const botMessage = { sender: "bot", text: data.reply || "Sorry, I didn't get that." };
       setMessages((prev) => [...prev, botMessage]);
@@ -28,8 +33,17 @@ function Chatbot({ onClose }) {
       console.error(err);
       const errorMsg = { sender: "bot", text: "Something went wrong. Try again later." };
       setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setSending(false);
     }
   };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // If not visible, render nothing
+  if (!visible) return null;
 
   return (
     <div className="fixed bottom-5 right-5 w-96 bg-white p-4 shadow-2xl rounded-2xl border z-50 border-gray-200">
@@ -39,7 +53,7 @@ function Chatbot({ onClose }) {
           Attendify Assistant
         </h2>
         <button
-          onClick={onClose}
+          onClick={() => setVisible(false)}
           className="text-gray-400 hover:text-red-500 transition text-xl"
         >
           <X />
@@ -64,6 +78,7 @@ function Chatbot({ onClose }) {
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
@@ -75,10 +90,12 @@ function Chatbot({ onClose }) {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           placeholder="Ask something..."
+          disabled={sending}
         />
         <button
           onClick={sendMessage}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition flex items-center justify-center"
+          disabled={sending}
         >
           <SendHorizonal size={16} />
         </button>

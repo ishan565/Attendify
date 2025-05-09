@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { databases } from "../appwrite/appwriteConfig";
-import { ID } from "appwrite";
+import { ID, Query } from "appwrite";
 import { useNavigate } from "react-router-dom";
 
 function MarkAttendance() {
@@ -13,7 +13,8 @@ function MarkAttendance() {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
-  const navigate = useNavigate(); // 👈 Hook to navigate
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,11 +24,33 @@ function MarkAttendance() {
     e.preventDefault();
     setLoading(true);
     setSuccess("");
+    setError("");
 
     try {
-      await databases.createDocument(
+      // 1. Check if a record exists for userId and Date
+      const res = await databases.listDocuments(
         "67dd782e000f6230d82b", // Database ID
         "67dd784200275f2e2ed1", // Collection ID
+        [
+          Query.equal("userId", form.userId),
+          Query.equal("Date", form.Date)
+        ]
+      );
+
+      // 2. If exists, delete the old record
+      if (res.documents.length > 0) {
+        const oldDocId = res.documents[0].$id;
+        await databases.deleteDocument(
+          "67dd782e000f6230d82b",
+          "67dd784200275f2e2ed1",
+          oldDocId
+        );
+      }
+
+      // 3. Create the new record
+      await databases.createDocument(
+        "67dd782e000f6230d82b",
+        "67dd784200275f2e2ed1",
         ID.unique(),
         form
       );
@@ -35,18 +58,18 @@ function MarkAttendance() {
       setSuccess("Attendance marked successfully!");
 
       setTimeout(() => {
-        navigate("/dashboard"); // 👈 Redirect to Dashboard
+        navigate("/dashboard");
       }, 1000);
 
       setForm({
-        userId: form.userId, // Keep userId to avoid retyping
+        userId: form.userId,
         Date: "",
         status: "Present",
         remarks: ""
       });
     } catch (error) {
       console.error("Error:", error);
-      setSuccess("Something went wrong. Try again!");
+      setError("Something went wrong. Try again!");
     } finally {
       setLoading(false);
     }
@@ -110,6 +133,9 @@ function MarkAttendance() {
 
         {success && (
           <p className="mt-4 text-center text-green-400">{success}</p>
+        )}
+        {error && (
+          <p className="mt-4 text-center text-red-400">{error}</p>
         )}
       </form>
     </div>
