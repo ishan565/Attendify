@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -8,12 +8,25 @@ import MarkAttendance from "./pages/MarkAttendance";
 import Welcome from './pages/Welcome';
 
 function App() {
+  const isAuthenticated = !!localStorage.getItem("token");
+
   return (
     <div className="min-h-screen w-full bg-gray-100">
       <Navbar />
       <Routes>
+        {/* Dynamic redirect based on auth */}
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Welcome />
+            )
+          }
+        />
+
         {/* Public Routes */}
-        <Route path="/" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/mark-attendance" element={<MarkAttendance />} />
