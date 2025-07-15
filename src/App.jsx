@@ -6,7 +6,8 @@ import Navbar from "./components/Navbar";
 import PrivateRoute from "./components/PrivateRoute";
 import MarkAttendance from "./pages/MarkAttendance";
 import Welcome from './pages/Welcome';
-import Quiz from "./pages/Quiz"; 
+import Quiz from "./pages/Quiz";
+
 function App() {
   const isAuthenticated = !!localStorage.getItem("token");
 
