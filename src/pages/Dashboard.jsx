@@ -275,9 +275,9 @@ function Dashboard() {
   
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen text-white">
+      <div className="flex flex-col items-center justify-center w-screen h-screen text-white">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mb-4"></div>
-        <p className="text-xl">Loading Dashboard...</p>
+        <p className="text-xl text-black">Loading Dashboard...</p>
       </div>
     );
   }
@@ -294,7 +294,7 @@ function Dashboard() {
               Logged in as <span className="text-white font-semibold">{user.email}</span>
             </p>
             <p className="text-lg md:text-xl text-gray-300 mb-8">
-              Track your university attendance with ease. Stay notified when your attendance falls below 75%.
+              Track your university attendance with ease. Stay alerted when your attendance falls below 75%.
             </p>
             <div className="flex gap-4 mb-10">
               <button
@@ -303,6 +303,14 @@ function Dashboard() {
               >
                 Logout
               </button>
+             
+   <button
+  onClick={() => navigate("/quiz")}
+  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-md transition"
+>
+  Upcoming Quiz?
+</button>
+
             </div>
             {/* Add Subject Panel */}
             <form

@@ -6,7 +6,7 @@ import Navbar from "./components/Navbar";
 import PrivateRoute from "./components/PrivateRoute";
 import MarkAttendance from "./pages/MarkAttendance";
 import Welcome from './pages/Welcome';
-
+import Quiz from "./pages/quiz"; 
 function App() {
   const isAuthenticated = !!localStorage.getItem("token");
 
@@ -40,7 +40,17 @@ function App() {
             </PrivateRoute>
           }
         />
-      </Routes>
+       {/* ✅ Add Quiz Route */}
+        <Route
+          path="/quiz"
+          element={
+            <PrivateRoute>
+              <Quiz />
+            </PrivateRoute>
+          }
+          />
+          </Routes>
+    
     </div>
   );
 }
